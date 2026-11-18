@@ -66,6 +66,14 @@ eas submit -p android                            # uploads to the internal testi
 - The Android package is `com.supal.kebhuya` (in `app.json`). **It can't be changed after the first Play upload.**
 - `versionCode` increments automatically on production builds (`appVersionSource: remote`).
 
+### Building from your phone (no PC)
+
+`.eas/workflows/build-apk.yml` builds a test APK on Expo's servers every time the `release` branch is pushed. One-time setup:
+
+1. On [expo.dev](https://expo.dev), create a project named `ke-bhuya` and copy its **project ID** into `app.json` under `expo.extra.eas.projectId` (or run `eas init` once on a computer).
+2. In the project on expo.dev, open **Settings → GitHub** and connect `supal/ke-bhuya`.
+3. Push `main` to `release` (`git push origin main:release`). The build appears on expo.dev, and you open its link on your phone to install the APK.
+
 ## Checks
 
 ```bash

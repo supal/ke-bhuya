@@ -1,0 +1,16 @@
+# Builds an installable Android APK on Expo's servers.
+# Runs when you push to the `release` branch, so normal commits on `main`
+# don't use up your monthly EAS builds.
+name: Build Android test APK
+
+on:
+  push:
+    branches: ['release']
+
+jobs:
+  build_android:
+    name: Build Android APK
+    type: build
+    params:
+      platform: android
+      profile: preview

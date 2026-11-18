@@ -149,16 +149,7 @@ function PassPhase({ game, t, lang, onQuit }: PhaseProps) {
                   {t.categoryLabel(categoryName(game, lang))}
                 </T>
               </View>
-              <T
-                font="display"
-                size={68}
-                color={colors.ink}
-                style={[styles.center, { lineHeight: 84 }]}
-                numberOfLines={2}
-                adjustsFontSizeToFit
-              >
-                {game.round.word[lang]}
-              </T>
+              <SecretWord text={game.round.word[lang]} />
               <T font="bodyMedium" size={16} color={colors.ink} style={styles.center}>
                 {t.dontTell}
               </T>
@@ -225,6 +216,29 @@ function PassPhase({ game, t, lang, onQuit }: PhaseProps) {
         )}
       </View>
     </Screen>
+  );
+}
+
+/**
+ * The secret word, as large as it fits. A single word stays on one line so it
+ * never breaks in the middle (চিড়িয়াখা / না); phrases may use two lines.
+ */
+function SecretWord({ text }: { text: string }) {
+  const length = Array.from(text).length;
+  const size = length <= 6 ? 68 : length <= 9 ? 54 : length <= 13 ? 44 : 36;
+  const singleWord = !text.includes(' ');
+  return (
+    <T
+      font="display"
+      size={size}
+      color={colors.ink}
+      style={[styles.center, { lineHeight: Math.round(size * 1.25), alignSelf: 'stretch' }]}
+      numberOfLines={singleWord ? 1 : 2}
+      adjustsFontSizeToFit
+      minimumFontScale={0.5}
+    >
+      {text}
+    </T>
   );
 }
 
@@ -385,9 +399,23 @@ function ClueTimer({ total, t, lang }: { total: number; t: Strings; lang: Lang }
 /* Vote                                                                */
 /* ------------------------------------------------------------------ */
 
+// Bengali vowel signs, nasal marks and nukta attach to the letter before them;
+// a hasanta (্) joins the next consonant into a conjunct (e.g. শ্রা).
+const BN_MARK = /[\u0981-\u0983\u09BC\u09BE-\u09CC\u09D7]/;
+const BN_HASANTA = '\u09CD';
+
+/** First letter of a name, keeping Bangla conjuncts and vowel signs whole. */
 function initials(name: string) {
-  // Two grapheme-ish characters work for both Bangla and Latin names.
-  return Array.from(name.trim()).slice(0, 2).join('');
+  const chars = Array.from(name.trim());
+  if (chars.length === 0) return '?';
+  let out = chars[0];
+  for (let i = 1; i < chars.length; i++) {
+    const c = chars[i];
+    const prev = chars[i - 1];
+    if (BN_MARK.test(c) || c === BN_HASANTA || prev === BN_HASANTA || c === '\u200D') out += c;
+    else break;
+  }
+  return out.toLocaleUpperCase();
 }
 
 function VotePhase({ game, t, onQuit }: PhaseProps) {
@@ -598,6 +626,7 @@ const styles = StyleSheet.create({
   card: {
     flex: 1,
     maxHeight: 420,
+    marginHorizontal: 12,
     borderRadius: radius.xl,
     alignItems: 'center',
     justifyContent: 'center',
