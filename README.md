@@ -16,6 +16,12 @@ npx expo start
 
 Scan the QR code with **Expo Go** on Android. Every library used here is included in Expo Go, so you don't need a development build.
 
+This project uses **Expo SDK 58**. If Expo Go from the Play Store says *"Project is incompatible with this version of Expo Go"*, the store version is still on an older SDK. Install the SDK 58 Expo Go from [expo.dev/go](https://expo.dev/go), or skip Expo Go and install a test APK instead:
+
+```bash
+eas build -p android --profile preview   # open the build link on your phone to install the APK
+```
+
 ## Project layout
 
 ```
