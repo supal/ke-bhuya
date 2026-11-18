@@ -70,7 +70,7 @@ eas submit -p android                            # uploads to the internal testi
 
 `.eas/workflows/build-apk.yml` builds a test APK on Expo's servers every time the `release` branch is pushed. One-time setup:
 
-1. On [expo.dev](https://expo.dev), create a project named `ke-bhuya` and copy its **project ID** into `app.json` under `expo.extra.eas.projectId` (or run `eas init` once on a computer).
+1. ~~Create the Expo project~~ Done: the project ID is in `app.json` (`expo.extra.eas.projectId`).
 2. In the project on expo.dev, open **Settings → GitHub** and connect `supal/ke-bhuya`.
 3. Push `main` to `release` (`git push origin main:release`). The build appears on expo.dev, and you open its link on your phone to install the APK.
 
