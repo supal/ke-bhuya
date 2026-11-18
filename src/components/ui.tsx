@@ -4,7 +4,6 @@ import {
   StyleSheet,
   Text,
   View,
-  type PressableProps,
   type StyleProp,
   type TextProps,
   type TextStyle,

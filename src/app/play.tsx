@@ -238,25 +238,8 @@ const RING_C = 2 * Math.PI * RING_R;
 function CluesPhase({ game, t, lang, onQuit }: PhaseProps) {
   const { dispatch } = useGame();
   const total = game.timerSeconds;
-  const [left, setLeft] = useState(total ?? 0);
   const current = game.round.clueOrder[game.clueIndex];
   const isLast = game.clueIndex === game.players.length - 1;
-
-  useEffect(() => {
-    if (total == null) return;
-    setLeft(total);
-    const id = setInterval(() => {
-      setLeft((s) => {
-        if (s <= 1) {
-          clearInterval(id);
-          Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning).catch(() => {});
-          return 0;
-        }
-        return s - 1;
-      });
-    }, 1000);
-    return () => clearInterval(id);
-  }, [game.clueIndex, total]);
 
   return (
     <Screen>
@@ -274,41 +257,7 @@ function CluesPhase({ game, t, lang, onQuit }: PhaseProps) {
       />
 
       <View style={{ alignItems: 'center', gap: 4, paddingVertical: 8 }}>
-        {total != null && (
-          <View style={styles.ring} accessible accessibilityLabel={left > 0 ? t.secondsLeft(left) : t.timeUp}>
-            <Svg width={168} height={168} viewBox="0 0 168 168">
-              <Circle cx={84} cy={84} r={RING_R} fill="none" stroke={colors.surfaceMuted} strokeWidth={12} />
-              <Circle
-                cx={84}
-                cy={84}
-                r={RING_R}
-                fill="none"
-                stroke={left > 5 ? colors.mint : colors.coral}
-                strokeWidth={12}
-                strokeLinecap="round"
-                strokeDasharray={RING_C}
-                strokeDashoffset={RING_C * (1 - left / total)}
-                transform="rotate(-90 84 84)"
-              />
-            </Svg>
-            <View style={styles.ringLabel}>
-              {left > 0 ? (
-                <>
-                  <T font="display" size={50} style={{ lineHeight: 56 }}>
-                    {num(left, lang)}
-                  </T>
-                  <T size={14} color={colors.textMuted}>
-                    {t.seconds}
-                  </T>
-                </>
-              ) : (
-                <T font="displayBold" size={24} color={colors.coralText}>
-                  {t.timeUp}
-                </T>
-              )}
-            </View>
-          </View>
-        )}
+        {total != null && <ClueTimer key={game.clueIndex} total={total} t={t} lang={lang} />}
         <T size={16} color={colors.textMuted}>
           {t.nowGives}
         </T>
@@ -374,6 +323,61 @@ function CluesPhase({ game, t, lang, onQuit }: PhaseProps) {
         />
       </View>
     </Screen>
+  );
+}
+
+/** Counts down one player's clue time. Keyed by the clue index, so it restarts for each player. */
+function ClueTimer({ total, t, lang }: { total: number; t: Strings; lang: Lang }) {
+  const [left, setLeft] = useState(total);
+
+  useEffect(() => {
+    const id = setInterval(() => {
+      setLeft((s) => {
+        if (s <= 1) {
+          clearInterval(id);
+          Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning).catch(() => {});
+          return 0;
+        }
+        return s - 1;
+      });
+    }, 1000);
+    return () => clearInterval(id);
+  }, []);
+
+  return (
+    <View style={styles.ring} accessible accessibilityLabel={left > 0 ? t.secondsLeft(left) : t.timeUp}>
+      <Svg width={168} height={168} viewBox="0 0 168 168">
+        <Circle cx={84} cy={84} r={RING_R} fill="none" stroke={colors.surfaceMuted} strokeWidth={12} />
+        <Circle
+          cx={84}
+          cy={84}
+          r={RING_R}
+          fill="none"
+          stroke={left > 5 ? colors.mint : colors.coral}
+          strokeWidth={12}
+          strokeLinecap="round"
+          strokeDasharray={RING_C}
+          strokeDashoffset={RING_C * (1 - left / total)}
+          transform="rotate(-90 84 84)"
+        />
+      </Svg>
+      <View style={styles.ringLabel}>
+        {left > 0 ? (
+          <>
+            <T font="display" size={50} style={{ lineHeight: 56 }}>
+              {num(left, lang)}
+            </T>
+            <T size={14} color={colors.textMuted}>
+              {t.seconds}
+            </T>
+          </>
+        ) : (
+          <T font="displayBold" size={24} color={colors.coralText}>
+            {t.timeUp}
+          </T>
+        )}
+      </View>
+    </View>
   );
 }
 
