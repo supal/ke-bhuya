@@ -6,6 +6,7 @@ A Bangla pass-and-play party game for Android, built with Expo (React Native). T
 - Bangla and English interface
 - 6 topics with about 200 words: খাবার, জায়গা, ঘরের জিনিস, পেশা, উৎসব, খেলাধুলা
 - 1 or 2 imposters, an optional topic hint for the imposter, a clue timer, and a running scoreboard
+- Future more games
 
 ## Run it on your phone
 
