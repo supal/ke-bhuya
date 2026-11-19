@@ -44,7 +44,9 @@ Character limits: app name 30, short description 80, full description 4000.
 
 আড্ডা, পিকনিক, ঈদের ছুটি, বিয়ে বাড়ি বা লম্বা জার্নি — যেকোনো জমায়েতে জমে যাবে কে ভুয়া?
 
-শীঘ্রই আসছে: রাজা-মন্ত্রী-চোর-পুলিশ আর ডাম্ব শারাডস।
+আরও দুটি খেলা সাথে:
+• রাজা-মন্ত্রী-চোর-পুলিশ — চিরকুট টানো, রাজার হুকুমে চোর ধরো (৪ জন)
+• ডাম্ব শারাডস — দলে দলে অভিনয়: প্রবাদ, কাজকর্ম, প্রাণী আর আরও
 ```
 
 ---
@@ -87,7 +89,9 @@ Features
 
 Perfect for adda, picnics, Eid holidays, weddings and long journeys.
 
-Coming soon: Raja-Mantri-Chor-Police and Dumb Charades.
+Two more games included:
+• Raja-Mantri-Chor-Police: draw secret slips and catch the thief (4 players)
+• Dumb Charades: team acting game with proverbs, actions, animals and more
 ```
 
 ---

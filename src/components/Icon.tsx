@@ -15,7 +15,12 @@ export type IconName =
   | 'crown'
   | 'hand'
   | 'help'
-  | 'arrow';
+  | 'arrow'
+  | 'quill'
+  | 'shield'
+  | 'refresh'
+  | 'mute'
+  | 'users';
 
 type Props = { name: IconName; size?: number; color: string; strokeWidth?: number };
 
@@ -95,6 +100,39 @@ export function Icon({ name, size = 24, color, strokeWidth = 2 }: Props) {
         </>
       )}
       {name === 'arrow' && <Path d="M5 12h14M13 6l6 6-6 6" {...stroke} />}
+      {name === 'quill' && (
+        <>
+          <Path d="M20 3c-7 1-12 6-13 13l-3 5 5-3c7-1 12-6 13-13z" {...stroke} />
+          <Path d="M7 16l6-6" {...stroke} />
+        </>
+      )}
+      {name === 'shield' && (
+        <>
+          <Path d="M12 3l7 3v6c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V6l7-3z" {...stroke} />
+          <Path d="M9 12l2 2 4-4" {...stroke} />
+        </>
+      )}
+      {name === 'refresh' && (
+        <>
+          <Path d="M4 12a8 8 0 0114-5.3L20 9M20 4v5h-5" {...stroke} />
+          <Path d="M20 12a8 8 0 01-14 5.3L4 15M4 20v-5h5" {...stroke} />
+        </>
+      )}
+      {name === 'mute' && (
+        <>
+          <Path d="M3 3l18 18" {...stroke} />
+          <Path d="M9 9v3a3 3 0 005.1 2.1M15 9.3V5a3 3 0 00-5.7-1.3" {...stroke} />
+          <Path d="M19 11a7 7 0 01-.6 2.8M5 11a7 7 0 0010.6 6" {...stroke} />
+          <Path d="M12 18v3" {...stroke} />
+        </>
+      )}
+      {name === 'users' && (
+        <>
+          <Circle cx={9} cy={8} r={3.5} {...stroke} />
+          <Path d="M2.5 20c0-3.6 2.9-6 6.5-6s6.5 2.4 6.5 6" {...stroke} />
+          <Path d="M15.5 4.6a3.5 3.5 0 010 6.8M18 14.4c2 .8 3.5 2.8 3.5 5.6" {...stroke} />
+        </>
+      )}
     </Svg>
   );
 }

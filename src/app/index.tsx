@@ -3,13 +3,18 @@ import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 
 import { Icon, type IconName } from '@/components/Icon';
 import { Screen, SectionTitle, T } from '@/components/ui';
+import { ROLE_STYLE } from '@/components/roles';
 import { useGame } from '@/game/GameContext';
+import { charadesStrings } from '@/i18n/charades';
+import { rajaStrings } from '@/i18n/raja';
 import type { Lang } from '@/i18n/strings';
 import { colors, radius } from '@/theme';
 
 export default function Home() {
   const router = useRouter();
   const { t, lang, updateSettings } = useGame();
+  const r = rajaStrings[lang];
+  const c = charadesStrings[lang];
 
   return (
     <Screen>
@@ -31,31 +36,30 @@ export default function Home() {
         <View style={{ gap: 12 }}>
           <SectionTitle>{t.chooseGame}</SectionTitle>
 
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel={`${t.imposterTitle}. ${t.imposterDesc}`}
-            onPress={() => router.push('/setup')}
-            style={({ pressed }) => [styles.gameCard, styles.gameCardActive, pressed && { opacity: 0.85 }]}
-          >
-            <View style={[styles.gameIcon, { backgroundColor: colors.marigold }]}>
-              <Icon name="person" size={32} color={colors.ink} />
-            </View>
-            <View style={{ flex: 1 }}>
-              <T font="displayBold" size={24}>
-                {t.imposterTitle}
-              </T>
-              <T size={15} color={colors.textSoft}>
-                {t.imposterDesc}
-              </T>
-              <T size={13} color={colors.textMuted}>
-                {t.playersRange}
-              </T>
-            </View>
-            <Icon name="chevron" size={28} color={colors.marigold} strokeWidth={2.2} />
-          </Pressable>
-
-          <ComingSoonCard icon="crown" title={t.rajaMantri} badge={t.comingSoon} />
-          <ComingSoonCard icon="hand" title={t.charades} badge={t.comingSoon} />
+          <GameCard
+            icon="person"
+            color={colors.marigold}
+            title={t.imposterTitle}
+            desc={t.imposterDesc}
+            meta={t.playersRange}
+            onPress={() => router.push('/imposter/setup')}
+          />
+          <GameCard
+            icon="crown"
+            color={ROLE_STYLE.police.color}
+            title={r.title}
+            desc={r.desc}
+            meta={r.playersMeta}
+            onPress={() => router.push('/raja/setup')}
+          />
+          <GameCard
+            icon="hand"
+            color="#7C9CFF"
+            title={c.title}
+            desc={c.desc}
+            meta={c.meta}
+            onPress={() => router.push('/charades/setup')}
+          />
         </View>
 
         <Pressable
@@ -73,23 +77,44 @@ export default function Home() {
   );
 }
 
-function ComingSoonCard({ icon, title, badge }: { icon: IconName; title: string; badge: string }) {
+function GameCard({
+  icon,
+  color,
+  title,
+  desc,
+  meta,
+  onPress,
+}: {
+  icon: IconName;
+  color: string;
+  title: string;
+  desc: string;
+  meta: string;
+  onPress: () => void;
+}) {
   return (
-    <View style={styles.gameCard} accessible accessibilityLabel={`${title}. ${badge}`}>
-      <View style={[styles.gameIcon, { backgroundColor: colors.surfaceMuted }]}>
-        <Icon name={icon} size={30} color={colors.textMuted} strokeWidth={1.8} />
+    <Pressable
+      accessibilityRole="button"
+      accessibilityLabel={`${title}. ${desc}`}
+      onPress={onPress}
+      style={({ pressed }) => [styles.gameCard, pressed && { opacity: 0.85, borderColor: color }]}
+    >
+      <View style={[styles.gameIcon, { backgroundColor: color }]}>
+        <Icon name={icon} size={30} color={colors.ink} />
       </View>
-      <View style={{ flex: 1, gap: 4 }}>
-        <T font="displayBold" size={20} color={colors.textSoft}>
+      <View style={{ flex: 1 }}>
+        <T font="displayBold" size={21} numberOfLines={1} adjustsFontSizeToFit>
           {title}
         </T>
-        <View style={styles.badge}>
-          <T font="bodySemi" size={13} color={colors.textMuted}>
-            {badge}
-          </T>
-        </View>
+        <T size={14} color={colors.textSoft}>
+          {desc}
+        </T>
+        <T size={13} color={colors.textMuted}>
+          {meta}
+        </T>
       </View>
-    </View>
+      <Icon name="chevron" size={26} color={color} strokeWidth={2.2} />
+    </Pressable>
   );
 }
 
@@ -134,15 +159,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: colors.line,
   },
-  gameCardActive: { backgroundColor: colors.surfaceRaised, borderWidth: 2, borderColor: colors.marigold },
   gameIcon: { width: 56, height: 56, borderRadius: 16, alignItems: 'center', justifyContent: 'center' },
-  badge: {
-    alignSelf: 'flex-start',
-    backgroundColor: colors.surfaceMuted,
-    paddingHorizontal: 10,
-    paddingVertical: 1,
-    borderRadius: radius.pill,
-  },
   helpButton: {
     marginTop: 'auto',
     alignSelf: 'center',

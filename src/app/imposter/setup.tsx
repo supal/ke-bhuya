@@ -45,7 +45,7 @@ export default function Setup() {
     const problem = validateSettings(settings);
     if (problem) return setError(t[problem]);
     dispatch({ type: 'start', settings });
-    router.push('/play');
+    router.push('/imposter/play');
   }
 
   return (

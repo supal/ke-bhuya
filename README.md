@@ -1,12 +1,15 @@
 # কে ভুয়া? (Ke Bhuya?)
 
-A Bangla pass-and-play party game for Android, built with Expo (React Native). The first game is **Imposter**. Everyone gets the same secret word except the imposter, players take turns giving one clue each, then the group votes on who the imposter is.
+A collection of Bangla pass-and-play party games for Android, built with Expo (React Native):
+
+- **ইমপোস্টার (Imposter):** everyone gets the same secret word except the imposter. Players give one clue each, then vote on who the imposter is.
+- **রাজা-মন্ত্রী-চোর-পুলিশ:** 4 players draw secret slips. The Raja reveals himself, then the Police (or Mantri) must find the thief. Points are editable.
+- **ডাম্ব শারাডস (Dumb Charades):** 2–4 teams. The actor sees a prompt (proverbs, actions, animals, jobs, food, places) and acts it out against the clock.
 
 - One phone, 3–12 players, works fully offline
 - Bangla and English interface
 - 6 topics with about 200 words: খাবার, জায়গা, ঘরের জিনিস, পেশা, উৎসব, খেলাধুলা
 - 1 or 2 imposters, an optional topic hint for the imposter, a clue timer, and a running scoreboard
-- Future more games
 
 ## Run it on your phone
 
@@ -30,15 +33,18 @@ src/
   app/                 Screens (Expo Router)
     _layout.tsx        Fonts, splash screen, game provider, stack
     index.tsx          Home: game list, language switch
-    setup.tsx          Players, imposters, topics, hint and timer
-    play.tsx           Pass the phone → clues → vote → result and scoreboard
-    how-to-play.tsx    Rules
+    imposter/          setup.tsx, play.tsx (pass → clues → vote → result)
+    raja/              setup.tsx, play.tsx (deal → showdown → result → winner)
+    charades/          setup.tsx, play.tsx (handover → card → acting → score → winner)
+    how-to-play.tsx    Imposter rules
   game/
-    engine.ts          Pure game logic (reducer, word picking, scoring)
-    GameContext.tsx    Settings (saved with AsyncStorage) and game state
-  data/words.json      Word lists: add words or topics here, no code changes needed
-  i18n/strings.ts      All Bangla and English text
-  components/          Shared UI and icons
+    engine.ts          Imposter logic (reducer, word picking, scoring)
+    GameContext.tsx    Language, Imposter settings and game state
+    raja/, charades/   Each game's pure logic (engine.ts) and state provider
+  data/words.json      Imposter word lists (Charades also uses jobs, food, places)
+  data/charades.json   Charades prompts: proverbs, actions, animals
+  i18n/                strings.ts (shared + Imposter), raja.ts, charades.ts
+  components/          ui.tsx, game.tsx (shared game pieces), roles.tsx, Icon.tsx
   theme.ts             Colours and fonts
 ```
 

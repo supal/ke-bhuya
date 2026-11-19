@@ -13,6 +13,8 @@ import { useEffect } from 'react';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import { GameProvider, useGame } from '@/game/GameContext';
+import { CharadesProvider } from '@/game/charades/CharadesContext';
+import { RajaProvider } from '@/game/raja/RajaContext';
 import { colors } from '@/theme';
 
 SplashScreen.preventAutoHideAsync().catch(() => {});
@@ -44,8 +46,12 @@ function RootStack() {
       }}
     >
       <Stack.Screen name="index" />
-      <Stack.Screen name="setup" />
-      <Stack.Screen name="play" options={{ gestureEnabled: false }} />
+      <Stack.Screen name="imposter/setup" />
+      <Stack.Screen name="imposter/play" options={{ gestureEnabled: false }} />
+      <Stack.Screen name="raja/setup" />
+      <Stack.Screen name="raja/play" options={{ gestureEnabled: false }} />
+      <Stack.Screen name="charades/setup" />
+      <Stack.Screen name="charades/play" options={{ gestureEnabled: false }} />
       <Stack.Screen name="how-to-play" options={{ presentation: 'modal', animation: 'slide_from_bottom' }} />
     </Stack>
   );
@@ -55,8 +61,12 @@ export default function RootLayout() {
   return (
     <SafeAreaProvider>
       <GameProvider>
-        <StatusBar style="light" />
-        <RootStack />
+        <RajaProvider>
+          <CharadesProvider>
+            <StatusBar style="light" />
+            <RootStack />
+          </CharadesProvider>
+        </RajaProvider>
       </GameProvider>
     </SafeAreaProvider>
   );

@@ -1,12 +1,21 @@
 import * as Haptics from 'expo-haptics';
 import { useKeepAwake } from 'expo-keep-awake';
 import { useRouter } from 'expo-router';
-import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react';
-import { Alert, BackHandler, Pressable, ScrollView, StyleSheet, View } from 'react-native';
-import Svg, { Circle } from 'react-native-svg';
+import { useEffect, useRef, useState } from 'react';
+import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 
+import {
+  FitText,
+  FootNote,
+  HoldButton,
+  TimerRing,
+  TopBar,
+  initials,
+  useCountdown,
+  useQuitGuard,
+} from '@/components/game';
 import { Icon } from '@/components/Icon';
-import { Button, IconButton, Screen, T } from '@/components/ui';
+import { Button, Screen, T } from '@/components/ui';
 import { categoryById, type GameState } from '@/game/engine';
 import { useGame } from '@/game/GameContext';
 import { num, type Lang, type Strings } from '@/i18n/strings';
@@ -20,31 +29,10 @@ export default function Play() {
   // Opened without a running game (e.g. after the app was restarted): go to setup.
   const hadGameOnMount = useRef(!!game);
   useEffect(() => {
-    if (!hadGameOnMount.current) router.replace('/setup');
+    if (!hadGameOnMount.current) router.replace('/imposter/setup');
   }, [router]);
 
-  const quit = useCallback(() => {
-    Alert.alert(t.exitTitle, t.exitBody, [
-      { text: t.exitCancel, style: 'cancel' },
-      {
-        text: t.exitConfirm,
-        style: 'destructive',
-        onPress: () => {
-          router.back();
-          // End after the screen has left, so it never renders without a game.
-          setTimeout(endGame, 400);
-        },
-      },
-    ]);
-  }, [t, router, endGame]);
-
-  useEffect(() => {
-    const sub = BackHandler.addEventListener('hardwareBackPress', () => {
-      quit();
-      return true;
-    });
-    return () => sub.remove();
-  }, [quit]);
+  const { quit, leave } = useQuitGuard(endGame);
 
   if (!game) return null;
 
@@ -61,28 +49,13 @@ export default function Play() {
         <ResultPhase
           key={`result-${game.round.number}`}
           {...common}
-          onEnd={() => {
-            router.back();
-            setTimeout(endGame, 400);
-          }}
+          onEnd={leave}
         />
       );
   }
 }
 
 type PhaseProps = { game: GameState; t: Strings; lang: Lang; onQuit: () => void };
-
-function TopBar({ label, t, onQuit, right }: { label: string; t: Strings; onQuit: () => void; right?: ReactNode }) {
-  return (
-    <View style={styles.topBar}>
-      <T font="bodySemi" size={15} color={colors.textMuted} style={{ flex: 1 }}>
-        {label}
-      </T>
-      {right}
-      <IconButton icon="close" label={t.exitTitle} onPress={onQuit} color={colors.textMuted} />
-    </View>
-  );
-}
 
 function categoryName(game: GameState, lang: Lang) {
   return categoryById(game.round.categoryId)?.name[lang] ?? '';
@@ -104,7 +77,7 @@ function PassPhase({ game, t, lang, onQuit }: PhaseProps) {
 
   return (
     <Screen>
-      <TopBar label={t.playerOf(index + 1, game.players.length)} t={t} onQuit={onQuit} />
+      <TopBar label={t.playerOf(index + 1, game.players.length)} onQuit={onQuit} />
       <View style={styles.dots} accessible={false}>
         {game.players.map((p, i) => (
           <View
@@ -149,7 +122,7 @@ function PassPhase({ game, t, lang, onQuit }: PhaseProps) {
                   {t.categoryLabel(categoryName(game, lang))}
                 </T>
               </View>
-              <SecretWord text={game.round.word[lang]} />
+              <FitText text={game.round.word[lang]} />
               <T font="bodyMedium" size={16} color={colors.ink} style={styles.center}>
                 {t.dontTell}
               </T>
@@ -178,25 +151,16 @@ function PassPhase({ game, t, lang, onQuit }: PhaseProps) {
       </View>
 
       <View style={{ alignItems: 'center', gap: 16 }}>
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel={`${t.hold}, ${t.toSee}`}
+        <HoldButton
+          label={t.hold}
+          sub={t.toSee}
+          holding={holding}
           onPressIn={() => {
             setHolding(true);
             setSeen(true);
-            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium).catch(() => {});
           }}
           onPressOut={() => setHolding(false)}
-          style={[styles.holdButton, holding && { backgroundColor: 'rgba(255,182,39,0.28)' }]}
-        >
-          <Icon name="fingerprint" size={52} color={colors.marigold} strokeWidth={1.6} />
-          <T font="displayBold" size={19}>
-            {t.hold}
-          </T>
-          <T size={13} color={colors.textSoft}>
-            {t.toSee}
-          </T>
-        </Pressable>
+        />
 
         {seen && !holding ? (
           <Button
@@ -207,47 +171,16 @@ function PassPhase({ game, t, lang, onQuit }: PhaseProps) {
             style={{ alignSelf: 'stretch' }}
           />
         ) : (
-          <View style={styles.footNote}>
-            <Icon name="eyeOff" size={18} color={colors.textMuted} />
-            <T size={15} color={colors.textMuted}>
-              {t.releaseHides}
-            </T>
-          </View>
+          <FootNote text={t.releaseHides} />
         )}
       </View>
     </Screen>
   );
 }
 
-/**
- * The secret word, as large as it fits. A single word stays on one line so it
- * never breaks in the middle (চিড়িয়াখা / না); phrases may use two lines.
- */
-function SecretWord({ text }: { text: string }) {
-  const length = Array.from(text).length;
-  const size = length <= 6 ? 68 : length <= 9 ? 54 : length <= 13 ? 44 : 36;
-  const singleWord = !text.includes(' ');
-  return (
-    <T
-      font="display"
-      size={size}
-      color={colors.ink}
-      style={[styles.center, { lineHeight: Math.round(size * 1.25), alignSelf: 'stretch' }]}
-      numberOfLines={singleWord ? 1 : 2}
-      adjustsFontSizeToFit
-      minimumFontScale={0.5}
-    >
-      {text}
-    </T>
-  );
-}
-
 /* ------------------------------------------------------------------ */
 /* Clue round                                                          */
 /* ------------------------------------------------------------------ */
-
-const RING_R = 70;
-const RING_C = 2 * Math.PI * RING_R;
 
 function CluesPhase({ game, t, lang, onQuit }: PhaseProps) {
   const { dispatch } = useGame();
@@ -259,7 +192,7 @@ function CluesPhase({ game, t, lang, onQuit }: PhaseProps) {
     <Screen>
       <TopBar
         label={t.roundClues(game.round.number)}
-        t={t}
+       
         onQuit={onQuit}
         right={
           <View style={styles.topicChip}>
@@ -342,56 +275,16 @@ function CluesPhase({ game, t, lang, onQuit }: PhaseProps) {
 
 /** Counts down one player's clue time. Keyed by the clue index, so it restarts for each player. */
 function ClueTimer({ total, t, lang }: { total: number; t: Strings; lang: Lang }) {
-  const [left, setLeft] = useState(total);
-
-  useEffect(() => {
-    const id = setInterval(() => {
-      setLeft((s) => {
-        if (s <= 1) {
-          clearInterval(id);
-          Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning).catch(() => {});
-          return 0;
-        }
-        return s - 1;
-      });
-    }, 1000);
-    return () => clearInterval(id);
-  }, []);
-
+  const left = useCountdown(total);
   return (
-    <View style={styles.ring} accessible accessibilityLabel={left > 0 ? t.secondsLeft(left) : t.timeUp}>
-      <Svg width={168} height={168} viewBox="0 0 168 168">
-        <Circle cx={84} cy={84} r={RING_R} fill="none" stroke={colors.surfaceMuted} strokeWidth={12} />
-        <Circle
-          cx={84}
-          cy={84}
-          r={RING_R}
-          fill="none"
-          stroke={left > 5 ? colors.mint : colors.coral}
-          strokeWidth={12}
-          strokeLinecap="round"
-          strokeDasharray={RING_C}
-          strokeDashoffset={RING_C * (1 - left / total)}
-          transform="rotate(-90 84 84)"
-        />
-      </Svg>
-      <View style={styles.ringLabel}>
-        {left > 0 ? (
-          <>
-            <T font="display" size={50} style={{ lineHeight: 56 }}>
-              {num(left, lang)}
-            </T>
-            <T size={14} color={colors.textMuted}>
-              {t.seconds}
-            </T>
-          </>
-        ) : (
-          <T font="displayBold" size={24} color={colors.coralText}>
-            {t.timeUp}
-          </T>
-        )}
-      </View>
-    </View>
+    <TimerRing
+      left={left}
+      total={total}
+      lang={lang}
+      unit={t.seconds}
+      timeUp={t.timeUp}
+      a11yLabel={left > 0 ? t.secondsLeft(left) : t.timeUp}
+    />
   );
 }
 
@@ -399,32 +292,13 @@ function ClueTimer({ total, t, lang }: { total: number; t: Strings; lang: Lang }
 /* Vote                                                                */
 /* ------------------------------------------------------------------ */
 
-// Bengali vowel signs, nasal marks and nukta attach to the letter before them;
-// a hasanta (্) joins the next consonant into a conjunct (e.g. শ্রা).
-const BN_MARK = /[\u0981-\u0983\u09BC\u09BE-\u09CC\u09D7]/;
-const BN_HASANTA = '\u09CD';
-
-/** First letter of a name, keeping Bangla conjuncts and vowel signs whole. */
-function initials(name: string) {
-  const chars = Array.from(name.trim());
-  if (chars.length === 0) return '?';
-  let out = chars[0];
-  for (let i = 1; i < chars.length; i++) {
-    const c = chars[i];
-    const prev = chars[i - 1];
-    if (BN_MARK.test(c) || c === BN_HASANTA || prev === BN_HASANTA || c === '\u200D') out += c;
-    else break;
-  }
-  return out.toLocaleUpperCase();
-}
-
 function VotePhase({ game, t, onQuit }: PhaseProps) {
   const { dispatch } = useGame();
   const [picked, setPicked] = useState<number | null>(null);
 
   return (
     <Screen>
-      <TopBar label="" t={t} onQuit={onQuit} />
+      <TopBar label="" onQuit={onQuit} />
       <View style={{ alignItems: 'center', marginBottom: 20 }}>
         <T font="display" size={48} color={colors.coral} style={{ lineHeight: 60 }} accessibilityRole="header">
           {t.whoIs}
@@ -502,7 +376,7 @@ function ResultPhase({ game, t, lang, onQuit, onEnd }: PhaseProps & { onEnd: () 
 
   return (
     <Screen>
-      <TopBar label={t.roundLabel(game.round.number)} t={t} onQuit={onQuit} />
+      <TopBar label={t.roundLabel(game.round.number)} onQuit={onQuit} />
       <ScrollView contentContainerStyle={{ gap: 16, paddingBottom: 12 }} showsVerticalScrollIndicator={false}>
         <View style={[styles.banner, { backgroundColor: caught ? colors.mint : colors.coral }]}>
           <T font="display" size={36} color={colors.ink} style={{ lineHeight: 46 }} accessibilityRole="header">
@@ -619,7 +493,6 @@ function WordReveal({ game, t, lang }: { game: GameState; t: Strings; lang: Lang
 
 const styles = StyleSheet.create({
   center: { textAlign: 'center' },
-  topBar: { flexDirection: 'row', alignItems: 'center', gap: 8, minHeight: 44 },
   dots: { flexDirection: 'row', justifyContent: 'center', gap: 6, marginTop: 8 },
   dot: { width: 22, height: 6, borderRadius: radius.pill },
   passTop: { flex: 1, justifyContent: 'center', alignItems: 'stretch', paddingVertical: 16 },
@@ -639,21 +512,7 @@ const styles = StyleSheet.create({
     paddingVertical: 2,
     borderRadius: radius.pill,
   },
-  holdButton: {
-    width: 180,
-    height: 180,
-    borderRadius: radius.pill,
-    borderWidth: 3,
-    borderColor: colors.marigold,
-    backgroundColor: 'rgba(255,182,39,0.12)',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 2,
-  },
-  footNote: { flexDirection: 'row', alignItems: 'center', gap: 8, height: 60 },
   topicChip: { backgroundColor: colors.marigold, paddingHorizontal: 12, paddingVertical: 2, borderRadius: radius.pill },
-  ring: { width: 168, height: 168 },
-  ringLabel: { ...StyleSheet.absoluteFill, alignItems: 'center', justifyContent: 'center' },
   orderList: {
     flexGrow: 0,
     flexShrink: 1,
