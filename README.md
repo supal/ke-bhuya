@@ -74,6 +74,12 @@ eas submit -p android                            # uploads to the internal testi
 2. In the project on expo.dev, open **Settings → GitHub** and connect `supal/ke-bhuya`.
 3. Push `main` to `release` (`git push origin main:release`). The build appears on expo.dev, and you open its link on your phone to install the APK.
 
+### Publishing on Google Play
+
+Step-by-step checklist, listing text and graphics: [`store/README.md`](store/README.md). Privacy policy: [`PRIVACY.md`](PRIVACY.md).
+
+Pushing to the `production` branch runs `.eas/workflows/build-production.yml`, which builds the Play Store `.aab`.
+
 ## Checks
 
 ```bash
