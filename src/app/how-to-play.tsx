@@ -1,10 +1,12 @@
 import { useRouter } from 'expo-router';
-import { ScrollView, StyleSheet, View } from 'react-native';
+import { Linking, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 
 import { Button, Screen, T } from '@/components/ui';
 import { useGame } from '@/game/GameContext';
 import { num } from '@/i18n/strings';
 import { colors, radius } from '@/theme';
+
+const PRIVACY_URL = 'https://github.com/supal/ke-bhuya/blob/main/PRIVACY.md';
 
 export default function HowToPlay() {
   const router = useRouter();
@@ -31,6 +33,15 @@ export default function HowToPlay() {
         <T font="bodySemi" size={15} color={colors.textSoft} style={{ marginTop: 4 }}>
           {t.rulesScoring}
         </T>
+        <Pressable
+          onPress={() => Linking.openURL(PRIVACY_URL)}
+          accessibilityRole="link"
+          hitSlop={8}
+          style={{ alignSelf: 'flex-start', marginTop: 8 }}>
+          <T font="bodySemi" size={14} color={colors.textSoft} style={{ textDecorationLine: 'underline' }}>
+            {t.privacyPolicy}
+          </T>
+        </Pressable>
       </ScrollView>
       <Button label={t.gotIt} onPress={() => router.back()} />
     </Screen>

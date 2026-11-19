@@ -116,6 +116,7 @@ export const strings = {
     ],
     rulesScoring: 'স্কোর: ইমপোস্টার জিতলে +২ পয়েন্ট, দল জিতলে প্রত্যেকে +১ পয়েন্ট।',
     gotIt: 'বুঝেছি',
+    privacyPolicy: 'গোপনীয়তা নীতি',
   },
   en: {
     appName: 'Ke Bhuya?',
@@ -219,6 +220,7 @@ export const strings = {
     ],
     rulesScoring: 'Scoring: imposter wins +2 points, group wins +1 point each.',
     gotIt: 'Got it',
+    privacyPolicy: 'Privacy policy',
   },
 };
 
